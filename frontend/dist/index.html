@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Azure Demand Dashboard — Milestone 1 + 2</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="dashboard-container">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h2>Azure Dashboard</h2>
+        <small>Milestone 1 + 2</small>
+      </div>
+      <nav class="nav">
+        <button class="nav-item active" data-target="overview">Overview</button>
+        <button class="nav-item" data-target="usage">Usage Trends</button>
+        <button class="nav-item" data-target="forecasts">Forecasts</button>
+        <button class="nav-item" data-target="insights">Insights</button>
+        <button class="nav-item" data-target="features">Features Table</button>
+      </nav>
+      <div class="footer">Team Dashboard</div>
+    </aside>
+
+    <main class="content">
+      <header class="toolbar">
+        <div class="filters">
+          <label>From <input type="date" id="fromDate" /></label>
+          <label>To <input type="date" id="toDate" /></label>
+          <label>Region
+            <select id="regionSelect"><option value="">All</option></select>
+          </label>
+          <label>Resource
+            <select id="rtypeSelect"><option value="">All</option></select>
+          </label>
+          <button id="applyFilters">Apply</button>
+        </div>
+      </header>
+
+      <!-- Overview -->
+      <section id="overview" class="tab-content active">
+        <h1>Overview</h1>
+        <div class="grid2">
+          <div class="chart-card"><canvas id="cpuUsageChart"></canvas></div>
+          <div class="chart-card"><canvas id="storageUsageChart"></canvas></div>
+        </div>
+        <div class="grid2">
+          <div class="chart-card"><canvas id="comparisonChart"></canvas></div>
+          <div class="chart-card"><canvas id="regionPieChart"></canvas></div>
+        </div>
+      </section>
+
+      <!-- Usage Trends -->
+      <section id="usage" class="tab-content">
+        <h1>Usage Trends</h1>
+        <div class="chart-card full"><canvas id="usageTrendsChart"></canvas></div>
+        <div class="table-container">
+          <table id="rawTable"><thead></thead><tbody></tbody></table>
+        </div>
+      </section>
+
+      <!-- Forecasts -->
+      <section id="forecasts" class="tab-content">
+        <h1>Forecasts & Capacity Recommendations</h1>
+        <div class="grid2">
+          <div class="chart-card"><canvas id="forecastChart"></canvas></div>
+          <div class="chart-card">
+            <h3>Recommendations</h3>
+            <ul id="recoList"></ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- ✅ Unified Insights Section -->
+      <section id="insights" class="tab-content">
+        <h2>Insights Dashboard</h2>
+
+        <div class="insight-section">
+          <h3>Peak Demand Times</h3>
+          <ul id="peakDates"></ul>
+        </div>
+
+        <div class="insight-section">
+          <h3>Top Regions by Growth</h3>
+          <ul id="topRegions"></ul>
+        </div>
+
+        <div class="insight-section">
+          <h3>External Factors Impact</h3>
+          <ul id="extImpact"></ul>
+        </div>
+
+        <!-- 🔴 NEW: Before vs After Comparison Chart -->
+        <div class="insight-section">
+          <h3>Comparison: Before vs After Feature Engineering</h3>
+          <canvas id="beforeAfterChart" width="400" height="200"></canvas>
+        </div>
+
+        <!-- 🔴 NEW: Seasonal Patterns Chart -->
+        <div class="insight-section">
+          <h3>Seasonal Patterns (Monthly & Weekly Variation)</h3>
+          <canvas id="seasonalChart" width="400" height="200"></canvas>
+        </div>
+      </section>
+
+      <!-- Features Table -->
+      <section id="features" class="tab-content">
+        <h1>Feature-Engineered Dataset</h1>
+        <div class="table-container">
+          <table id="featuresTable"><thead></thead><tbody></tbody></table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
