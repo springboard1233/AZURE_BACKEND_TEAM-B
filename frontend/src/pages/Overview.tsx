@@ -9,6 +9,20 @@ import {
   ChevronDown
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import {
+  AreaChart,
+  Area,
+  ResponsiveContainer,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Legend,
+  PieChart,
+  Pie,
+  Cell
+} from "recharts";
+import type { NameType, ValueType } from "recharts/types/component/DefaultTooltipContent";
 
 interface MergedRecord {
   date: string;
@@ -129,6 +143,42 @@ const FilterSelect: React.FC<FilterSelectProps> = ({
   );
 };
 
+interface UsageTrendPoint {
+  date: string;
+  usage_cpu: number;
+}
+
+interface RegionalUsageSlice {
+  name: string;
+  value: number;
+  color: string;
+  percent: number;
+  [key: string]: string | number;
+}
+
+type PieTooltipEntry = {
+  value?: ValueType;
+  name?: NameType;
+};
+
+type PieTooltipProps = {
+  active?: boolean;
+  payload?: PieTooltipEntry[];
+  label?: NameType;
+};
+
+const OVERVIEW_COLORS = ["#38bdf8", "#6366f1", "#ec4899", "#f97316", "#22c55e", "#a855f7", "#facc15", "#14b8a6"];
+
+const overviewTooltipStyles = {
+  backgroundColor: "rgba(15, 23, 42, 0.96)",
+  border: "1px solid rgba(96, 165, 250, 0.45)",
+  borderRadius: 18,
+  fontSize: 12,
+  padding: 14,
+  boxShadow: "0 30px 75px -40px rgba(14, 165, 233, 0.55)",
+  color: "#e2e8f0"
+};
+
 const Overview: React.FC = () => {
   const [data, setData] = useState<MergedRecord[]>([]);
   const [loading, setLoading] = useState(true);
@@ -197,6 +247,50 @@ const Overview: React.FC = () => {
       totalActiveUsers: totals.users
     };
   }, [filteredData]);
+
+  const usageTrend: UsageTrendPoint[] = useMemo(() => {
+    const grouped = filteredData.reduce<Record<string, UsageTrendPoint>>((acc, row) => {
+      if (!acc[row.date]) {
+        acc[row.date] = { date: row.date, usage_cpu: 0 };
+      }
+      acc[row.date].usage_cpu += Number(row.usage_cpu) || 0;
+      return acc;
+    }, {});
+
+    return Object.values(grouped).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  }, [filteredData]);
+
+  const regionalUsageDistribution: RegionalUsageSlice[] = useMemo(() => {
+    const totals = filteredData.reduce<Record<string, number>>((acc, row) => {
+      const region = row.region || "Unknown";
+      if (!acc[region]) acc[region] = 0;
+      acc[region] += Number(row.usage_cpu) || 0;
+      return acc;
+    }, {});
+
+    const totalUsage = Object.values(totals).reduce((sum, value) => sum + value, 0);
+
+    return Object.entries(totals).map(([region, value], index) => ({
+      name: region,
+      value,
+      color: OVERVIEW_COLORS[index % OVERVIEW_COLORS.length],
+      percent: totalUsage ? value / totalUsage : 0
+    }));
+  }, [filteredData]);
+
+  const pieTooltip = ({ active, payload, label }: PieTooltipProps) => {
+    if (!active || !payload?.length) return null;
+    const rawValue = Number(payload[0]?.value) || 0;
+    const matchingSlice = regionalUsageDistribution.find((slice) => slice.name === label);
+    const percentDisplay = matchingSlice ? (matchingSlice.percent * 100).toFixed(1) : "0.0";
+    return (
+      <div className="rounded-2xl border border-white/10 bg-slate-900/95 p-3 text-xs text-slate-200 shadow-lg">
+        <div className="font-semibold text-slate-100">{label}</div>
+        <div className="mt-1 text-slate-300">CPU Usage: {rawValue.toLocaleString()}</div>
+        <div className="text-slate-400 mt-1">Share: {percentDisplay}%</div>
+      </div>
+    );
+  };
 
   const formatNumber = (value: number, fractionDigits = 1) =>
     new Intl.NumberFormat("en-US", {
@@ -325,8 +419,83 @@ const Overview: React.FC = () => {
           </div>
         </article>
       </div>
+
+      <section className="grid gap-6 lg:grid-cols-2">
+        <div className="rounded-3xl border border-white/10 bg-slate-950/80 p-6 shadow-[0_42px_85px_-48px_rgba(56,189,248,0.35)]">
+          <div className="flex items-start justify-between">
+            <div>
+              <h2 className="text-xl font-semibold text-white">Usage Trends Over Time</h2>
+              <p className="mt-1 text-sm text-slate-300/80">CPU utilisation aligned with current filters</p>
+            </div>
+            <span className="rounded-full border border-sky-400/30 bg-sky-500/10 px-3 py-1 text-xs font-semibold text-sky-200">Trend</span>
+          </div>
+          <div className="mt-6 h-[320px]">
+            {usageTrend.length ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={usageTrend}>
+                  <defs>
+                    <linearGradient id="overviewTrend" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#38bdf8" stopOpacity={0.7} />
+                      <stop offset="95%" stopColor="#38bdf8" stopOpacity={0.05} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="4 6" stroke="#1e293b" />
+                  <XAxis dataKey="date" stroke="#475569" tick={{ fill: "#cbd5f5", fontSize: 12 }} tickLine={false} axisLine={false} />
+                  <YAxis stroke="#475569" tick={{ fill: "#cbd5f5", fontSize: 12 }} tickLine={false} axisLine={false} width={72} />
+                  <Tooltip contentStyle={overviewTooltipStyles} formatter={(value: number) => [`${formatNumber(value)} CPU`, "Usage"]} />
+                  <Area type="monotone" dataKey="usage_cpu" stroke="#38bdf8" strokeWidth={2.2} fill="url(#overviewTrend)" activeDot={{ r: 6 }} />
+                </AreaChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex h-full items-center justify-center text-sm text-slate-400">No data for the selected filters.</div>
+            )}
+          </div>
+        </div>
+
+        <div className="rounded-3xl border border-white/10 bg-slate-950/80 p-6 shadow-[0_42px_85px_-48px_rgba(249,115,22,0.35)]">
+          <div className="flex items-start justify-between">
+            <div>
+              <h2 className="text-xl font-semibold text-white">Regional Resource Distribution</h2>
+              <p className="mt-1 text-sm text-slate-300/80">CPU share by region and resource type</p>
+            </div>
+            <span className="rounded-full border border-amber-400/30 bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-200">Distribution</span>
+          </div>
+          <div className="mt-6 h-[320px]">
+            {regionalUsageDistribution.length ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={regionalUsageDistribution}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    innerRadius="45%"
+                    outerRadius="78%"
+                    paddingAngle={6}
+                    cornerRadius={18}
+                    stroke="#0f172a"
+                    strokeWidth={1.3}
+                    label={({ name, percent }) => `${name} ${((percent as number) * 100).toFixed(1)}%`}
+                    labelLine={false}
+                  >
+                    {regionalUsageDistribution.map((entry, index) => (
+                      <Cell key={entry.name} fill={entry.color} stroke={entry.color} opacity={0.92 - index * 0.02} />
+                    ))}
+                  </Pie>
+                  <Tooltip content={pieTooltip} />
+                  <Legend verticalAlign="bottom" wrapperStyle={{ color: "#e2e8f0", fontSize: 11 }} />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex h-full items-center justify-center text-sm text-slate-400">No resource distribution data.</div>
+            )}
+          </div>
+        </div>
+      </section>
     </div>
   );
 };
 
 export default Overview;
+
