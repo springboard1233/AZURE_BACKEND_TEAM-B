@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Cpu, BarChart3, Database, Zap, Calendar } from "lucide-react";
+import { Cpu, BarChart3, Database, Zap, Calendar, Table, Activity } from "lucide-react";
 
 const Sidebar: React.FC = () => {
   const location = useLocation();
@@ -10,6 +10,9 @@ const Sidebar: React.FC = () => {
     { name: "Analytics", path: "/analytics", icon: <BarChart3 /> },
     { name: "Raw Data", path: "/raw-data", icon: <Database /> },
     { name: "Merged Data", path: "/merged-data", icon: <Calendar /> },
+    { name: "Featured Data", path: "/featured-data", icon: <Table /> },
+    { name: "Performance Insights", path: "/performance", icon: <Activity /> },
+    { name: "Milestone 2 Dashboard", path: "/dashboard", icon: <Zap /> },
   ];
 
   return (
