@@ -85,7 +85,7 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({ label, value, options, 
   const labelText = selected?.label ?? value;
 
   return (
-    <div ref={containerRef} className="relative min-w-[180px]">
+    <div ref={containerRef} className="relative min-w-[180px]" style={{ zIndex: 100 }}>
       <span className="stellar-label text-[10px] text-slate-400">{label}</span>
       <button
         type="button"
@@ -99,7 +99,8 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({ label, value, options, 
       </button>
       {open && (
         <div
-          className="absolute right-0 z-30 mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/95 p-1 shadow-[0_24px_60px_-35px_rgba(129,140,248,0.6)] backdrop-blur"
+          className="absolute right-0 mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/95 p-1 shadow-[0_24px_60px_-35px_rgba(129,140,248,0.6)] backdrop-blur"
+          style={{ zIndex: 9999 }}
           role="listbox"
         >
           {options.map((option) => {
@@ -393,7 +394,7 @@ const PerformanceInsights: React.FC = () => {
         </div>
       </header>
 
-      <section className="rounded-[2.5rem] border border-white/10 bg-slate-900/75 p-7 shadow-[0_32px_75px_-40px_rgba(59,130,246,0.55)] backdrop-blur">
+      <section className="rounded-[2.5rem] border border-white/10 bg-slate-900/75 p-7 shadow-[0_32px_75px_-40px_rgba(59,130,246,0.55)] backdrop-blur relative" style={{ zIndex: 50 }}>
         <div className="flex flex-wrap items-center gap-5 text-xs font-semibold text-slate-400">
           <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-slate-100 stellar-label">
             <GaugeCircle className="h-4 w-4 text-purple-300" /> Filters
@@ -434,7 +435,7 @@ const PerformanceInsights: React.FC = () => {
             </button>
           </div>
           <div className="ml-auto flex flex-wrap items-center gap-4">
-            <div className="flex flex-col gap-1 text-[11px] text-slate-300">
+            <div className="flex flex-col gap-1 text-[11px] text-slate-300" style={{ zIndex: 10 }}>
               <span className="stellar-label text-[10px] text-slate-400">Date Mode</span>
               {dateMode === "range" && (
                 <div className="flex flex-wrap gap-3">
@@ -500,7 +501,7 @@ const PerformanceInsights: React.FC = () => {
         </div>
       </section>
 
-      <section className="grid gap-6 lg:grid-cols-4">
+      <section className="grid gap-6 lg:grid-cols-4 relative" style={{ zIndex: 1 }}>
         <div className="glow-card overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-purple-500/25 via-purple-600/20 to-slate-900/80 p-7 transition duration-300 hover:-translate-y-1 hover:shadow-[0_35px_60px_-35px_rgba(168,85,247,0.85)]">
           <h3 className="stellar-heading--cool text-sm">CPU Utilization</h3>
           <p className="mt-4 text-4xl font-semibold text-white">{formatPercent(metrics.cpuAvg)}%</p>
