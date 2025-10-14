@@ -13,6 +13,7 @@
     "@types/react-router-dom": "^5.3.3",
     "@types/recharts": "^1.8.29",
     "autoprefixer": "^10.4.0",
+    "axios": "^1.12.2",
     "framer-motion": "^11.18.2",
     "lucide-react": "^0.544.0",
     "papaparse": "^5.5.3",
